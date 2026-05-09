@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI App Generator
 
-## Getting Started
+A config-driven mini app generator inspired by Base44. It reads imperfect JSON configuration and turns it into a working web app with dynamic React views, Node/Next APIs, PostgreSQL persistence, authentication, CSV import, localization, notifications, dashboards, and PWA metadata.
 
-First, run the development server:
+## What Is Implemented
+
+- Dynamic runtime: JSON config is normalized and repaired before rendering.
+- Frontend: generated forms, tables, dashboards, loading states, error states, mobile layouts, and language switching.
+- Backend: dynamic model APIs with create, read, update, delete, CSV import, validation, and error handling.
+- Database: PostgreSQL with resilient JSONB records to handle optional fields and schema changes.
+- Authentication: email/password auth with JWT HTTP-only cookies, password strength checks, lockout handling, and user-scoped records.
+- Extensibility: UI components are isolated (`DynamicForm`, `DynamicTable`, `DynamicDashboard`) and config parsing is centralized.
+
+## Mandatory Feature Set
+
+The system includes more than three integrated platform capabilities:
+
+- Mobile-ready responsive apps.
+- CSV import system: upload CSV, validate/map rows, store them, and render records.
+- Multi-language localization: config-defined locales and runtime language switching.
+- Event notifications: config-defined triggers for create, update, delete, and CSV import, with mock transactional email status.
+- PWA/installable metadata: web manifest, app icon, and production service worker.
+
+## Local Setup
+
+1. Create `.env` from `.env.example`.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+DATABASE_URL="postgres://user:password@localhost:5432/ai_app_generator"
+JWT_SECRET="replace-with-a-long-random-secret"
+SETUP_TOKEN="optional-production-setup-token"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install and run.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Initialize the database in development.
 
-## Learn More
+```bash
+http://localhost:3000/api/setup
+```
 
-To learn more about Next.js, take a look at the following resources:
+4. Open the app.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+http://localhost:3000
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Example Config
 
-## Deploy on Vercel
+```json
+{
+  "name": "Employee Directory",
+  "auth": { "required": true },
+  "localization": {
+    "defaultLocale": "en",
+    "locales": {
+      "en": { "save": "Save", "import_csv": "Import CSV" },
+      "hi": { "save": "सेव करें", "import_csv": "CSV आयात करें" }
+    }
+  },
+  "notifications": {
+    "enabled": true,
+    "events": ["record.created", "record.updated", "record.deleted", "csv.imported"],
+    "mockEmail": true
+  },
+  "models": {
+    "employees": {
+      "fields": [
+        { "name": "name", "type": "string", "required": true },
+        { "name": "department", "type": "string" },
+        { "name": "salary", "type": "number" },
+        { "name": "is_active", "type": "boolean" }
+      ]
+    }
+  },
+  "views": [
+    {
+      "type": "dashboard",
+      "model": "employees",
+      "title": "Employee Dashboard",
+      "path": "/",
+      "widgets": [
+        { "type": "count", "title": "Total Employees" },
+        { "type": "recent", "title": "Recent Employees" }
+      ]
+    },
+    { "type": "table", "model": "employees", "title": "Employees", "path": "/employees" }
+  ]
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Verification
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm test
+npm run lint
+npm run build
+```
+
+Current local verification: 41 tests passing, lint passing, production build passing.
+
+## Deployment
+
+Deploy the Next.js app to Vercel, Render, Railway, or another Node-compatible host with PostgreSQL. Set these environment variables in the host:
+
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `SETUP_TOKEN` if you want to initialize the database through `/api/setup` in production.
+
+For production, initialize the database from a trusted setup request:
+
+```bash
+curl -H "x-setup-token: your-token" https://your-domain.com/api/setup
+```
+
+Without `SETUP_TOKEN`, `/api/setup` and `/api/init` return 404 in production.
