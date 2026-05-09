@@ -12,6 +12,21 @@ type AppListRow = {
   updated_at: string;
 };
 
+async function getAvailableAppId(baseId: string) {
+  let candidate = baseId;
+  let suffix = 2;
+
+  while (true) {
+    const existing = await query('SELECT id FROM apps WHERE id = $1', [candidate]);
+    if (!existing.rowCount) {
+      return candidate;
+    }
+
+    candidate = `${baseId}-${suffix}`;
+    suffix += 1;
+  }
+}
+
 export async function GET() {
   try {
     const user = await getUser();
@@ -36,7 +51,8 @@ export async function POST(req: Request) {
   try {
     const payload = (await req.json()) as { config?: unknown; id?: string };
     const config = parseConfig(payload.config);
-    const id = deriveAppId(config.name, payload.id);
+    const requestedId = deriveAppId(config.name, payload.id);
+    const id = await getAvailableAppId(requestedId);
     const user = await getUser();
 
     await client.query('BEGIN');
