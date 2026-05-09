@@ -8,3 +8,226 @@
 - Environments: .env
 ✓ Ready in 1195ms
 
+ GET / 200 in 1054ms (next.js: 525ms, application-code: 530ms)
+Executed query {
+  text: '\n' +
+    '    CREATE TABLE IF NOT EXISTS users (\n' +
+    '      id SERIAL PRIMARY KEY,\n' +
+    '      email VARCHAR(255) UNIQUE NOT NULL,\n' +
+    '      password_hash VARCHAR(255) NOT NULL,\n' +
+    '      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n' +
+    '    );\n' +
+    '  ',
+  duration: 798,
+  rows: null
+}
+Executed query {
+  text: '\n' +
+    '    ALTER TABLE users\n' +
+    '      ADD COLUMN IF NOT EXISTS failed_login_attempts INT NOT NULL DEFAULT 0,\n' +
+    '      ADD COLUMN IF NOT EXISTS locked_until TIMESTAMP NULL,\n' +
+    '      ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP NULL;\n' +
+    '  ',
+  duration: 13,
+  rows: null
+}
+Executed query {
+  text: '\n' +
+    '    CREATE TABLE IF NOT EXISTS apps (\n' +
+    '      id VARCHAR(255) PRIMARY KEY,\n' +
+    '      name VARCHAR(255) NOT NULL,\n' +
+    '      config JSONB NOT NULL,\n' +
+    '      owner_id INT REFERENCES users(id) ON DELETE SET NULL,\n' +
+    '      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n' +
+    '      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n' +
+    '    );\n' +
+    '  ',
+  duration: 1,
+  rows: null
+}
+Executed query {
+  text: '\n' +
+    '    ALTER TABLE apps\n' +
+    '      ADD COLUMN IF NOT EXISTS owner_id INT REFERENCES users(id) ON DELETE SET NULL;\n' +
+    '  ',
+  duration: 56,
+  rows: null
+}
+Executed query {
+  text: '\n' +
+    '    CREATE TABLE IF NOT EXISTS dynamic_records (\n' +
+    '      id SERIAL PRIMARY KEY,\n' +
+    '      app_id VARCHAR(255) REFERENCES apps(id) ON DELETE CASCADE,\n' +
+    '      model_name VARCHAR(255) NOT NULL,\n' +
+    '      owner_id INT REFERENCES users(id) ON DELETE SET NULL,\n' +
+    '      data JSONB NOT NULL,\n' +
+    '      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n' +
+    '    );\n' +
+    '    CREATE INDEX IF NOT EXISTS idx_dynamic_records_lookup ON dynamic_records (app_id, model_name);\n' +
+    '  ',
+  duration: 4,
+  rows: undefined
+}
+Executed query {
+  text: '\n' +
+    '    CREATE TABLE IF NOT EXISTS notifications (\n' +
+    '      id SERIAL PRIMARY KEY,\n' +
+    '      app_id VARCHAR(255) REFERENCES apps(id) ON DELETE CASCADE,\n' +
+    '      user_id INT REFERENCES users(id) ON DELETE SET NULL,\n' +
+    '      event VARCHAR(80) NOT NULL,\n' +
+    '      title VARCHAR(255) NOT NULL,\n' +
+    '      message TEXT NOT NULL,\n' +
+    '      read_at TIMESTAMP NULL,\n' +
+    '      mock_email_sent BOOLEAN NOT NULL DEFAULT FALSE,\n' +
+    '      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n' +
+    '    );\n' +
+    '    CREATE INDEX IF NOT EXISTS idx_notifications_lookup ON notifications (app_id, user_id, created_at);\n' +
+    '  ',
+  duration: 124,
+  rows: undefined
+}
+ GET /api/setup 200 in 1454ms (next.js: 424ms, application-code: 1030ms)
+Executed query {
+  text: '\n' +
+    '    CREATE TABLE IF NOT EXISTS users (\n' +
+    '      id SERIAL PRIMARY KEY,\n' +
+    '      email VARCHAR(255) UNIQUE NOT NULL,\n' +
+    '      password_hash VARCHAR(255) NOT NULL,\n' +
+    '      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n' +
+    '    );\n' +
+    '  ',
+  duration: 1,
+  rows: null
+}
+Executed query {
+  text: '\n' +
+    '    ALTER TABLE users\n' +
+    '      ADD COLUMN IF NOT EXISTS failed_login_attempts INT NOT NULL DEFAULT 0,\n' +
+    '      ADD COLUMN IF NOT EXISTS locked_until TIMESTAMP NULL,\n' +
+    '      ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP NULL;\n' +
+    '  ',
+  duration: 0,
+  rows: null
+}
+Executed query {
+  text: '\n' +
+    '    CREATE TABLE IF NOT EXISTS apps (\n' +
+    '      id VARCHAR(255) PRIMARY KEY,\n' +
+    '      name VARCHAR(255) NOT NULL,\n' +
+    '      config JSONB NOT NULL,\n' +
+    '      owner_id INT REFERENCES users(id) ON DELETE SET NULL,\n' +
+    '      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n' +
+    '      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n' +
+    '    );\n' +
+    '  ',
+  duration: 0,
+  rows: null
+}
+Executed query {
+  text: '\n' +
+    '    ALTER TABLE apps\n' +
+    '      ADD COLUMN IF NOT EXISTS owner_id INT REFERENCES users(id) ON DELETE SET NULL;\n' +
+    '  ',
+  duration: 1,
+  rows: null
+}
+Executed query {
+  text: '\n' +
+    '    CREATE TABLE IF NOT EXISTS dynamic_records (\n' +
+    '      id SERIAL PRIMARY KEY,\n' +
+    '      app_id VARCHAR(255) REFERENCES apps(id) ON DELETE CASCADE,\n' +
+    '      model_name VARCHAR(255) NOT NULL,\n' +
+    '      owner_id INT REFERENCES users(id) ON DELETE SET NULL,\n' +
+    '      data JSONB NOT NULL,\n' +
+    '      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n' +
+    '    );\n' +
+    '    CREATE INDEX IF NOT EXISTS idx_dynamic_records_lookup ON dynamic_records (app_id, model_name);\n' +
+    '  ',
+  duration: 0,
+  rows: undefined
+}
+Executed query {
+  text: '\n' +
+    '    CREATE TABLE IF NOT EXISTS notifications (\n' +
+    '      id SERIAL PRIMARY KEY,\n' +
+    '      app_id VARCHAR(255) REFERENCES apps(id) ON DELETE CASCADE,\n' +
+    '      user_id INT REFERENCES users(id) ON DELETE SET NULL,\n' +
+    '      event VARCHAR(80) NOT NULL,\n' +
+    '      title VARCHAR(255) NOT NULL,\n' +
+    '      message TEXT NOT NULL,\n' +
+    '      read_at TIMESTAMP NULL,\n' +
+    '      mock_email_sent BOOLEAN NOT NULL DEFAULT FALSE,\n' +
+    '      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n' +
+    '    );\n' +
+    '    CREATE INDEX IF NOT EXISTS idx_notifications_lookup ON notifications (app_id, user_id, created_at);\n' +
+    '  ',
+  duration: 1,
+  rows: undefined
+}
+Executed query {
+  text: 'SELECT id FROM users WHERE email = $1',
+  duration: 16,
+  rows: 0
+}
+Executed query {
+  text: 'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email',
+  duration: 5,
+  rows: 1
+}
+ POST /api/auth/register 201 in 378ms (next.js: 180ms, application-code: 199ms)
+Executed query { text: 'SELECT * FROM users WHERE email = $1', duration: 2, rows: 1 }
+Executed query {
+  text: 'UPDATE users SET failed_login_attempts = 0, locked_until = NULL, last_login_at = CURRENT_TIMESTAMP WHERE id = $1',
+  duration: 4,
+  rows: 1
+}
+ POST /api/auth/login 200 in 260ms (next.js: 103ms, application-code: 157ms)
+ POST /api/apps 201 in 196ms (next.js: 160ms, application-code: 35ms)
+Executed query { text: 'SELECT config FROM apps WHERE id = $1', duration: 1, rows: 1 }
+Executed query {
+  text: 'INSERT INTO dynamic_records (app_id, model_name, owner_id, data) VALUES ($1, $2, $3, $4) RETURNING *',
+  duration: 23,
+  rows: 1
+}
+Executed query {
+  text: 'INSERT INTO notifications (app_id, user_id, event, title, message, mock_email_sent)\n' +
+    '     VALUES ($1, $2, $3, $4, $5, $6)',
+  duration: 3,
+  rows: 1
+}
+ POST /api/apps/smoke-test-app/tasks 201 in 1619ms (next.js: 1571ms, application-code: 47ms)
+Executed query { text: 'SELECT config FROM apps WHERE id = $1', duration: 2, rows: 1 }
+Executed query {
+  text: 'SELECT * FROM dynamic_records WHERE app_id = $1 AND model_name = $2 AND owner_id = $3 ORDER BY created_at DESC',
+  duration: 7,
+  rows: 1
+}
+ GET /api/apps/smoke-test-app/tasks 200 in 44ms (next.js: 11ms, application-code: 33ms)
+Executed query { text: 'SELECT config FROM apps WHERE id = $1', duration: 1, rows: 1 }
+Executed query {
+  text: 'UPDATE dynamic_records SET data = $1 WHERE id = $2 AND app_id = $3 AND model_name = $4 AND owner_id = $5 RETURNING *',
+  duration: 1,
+  rows: 1
+}
+Executed query {
+  text: 'INSERT INTO notifications (app_id, user_id, event, title, message, mock_email_sent)\n' +
+    '     VALUES ($1, $2, $3, $4, $5, $6)',
+  duration: 1,
+  rows: 1
+}
+ PATCH /api/apps/smoke-test-app/tasks?id=59 200 in 29ms (next.js: 4ms, application-code: 24ms)
+Executed query {
+  text: 'SELECT id, event, title, message, read_at, mock_email_sent, created_at\n' +
+    '       FROM notifications\n' +
+    '       WHERE app_id = $1 AND (user_id IS NULL OR user_id = $2)\n' +
+    '       ORDER BY created_at DESC\n' +
+    '       LIMIT 20',
+  duration: 2,
+  rows: 2
+}
+ GET /api/apps/smoke-test-app/notifications 200 in 1675ms (next.js: 1659ms, application-code: 16ms)
+ GET / 200 in 175ms (next.js: 7ms, application-code: 167ms)
+ GET /auth/login 200 in 101ms (next.js: 62ms, application-code: 39ms)
+ GET /auth/register 200 in 728ms (next.js: 694ms, application-code: 33ms)
+ GET / 200 in 123ms (next.js: 11ms, application-code: 112ms)
+ GET / 200 in 69ms (next.js: 4ms, application-code: 65ms)
